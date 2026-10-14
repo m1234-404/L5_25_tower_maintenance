@@ -1,9 +1,11 @@
-﻿**Name:** OP Medha | **SRN:** PES2UG24CS332
+**Name:** OP Medha | **SRN:** PES2UG24CS332
 
 # Issues Found and Fixed
 
-| Issue | Type | Line(s) | Description | Fix Approach |
-|-------|------|---------|-------------|--------------|
+File: `tower_maintenance.py`. Line numbers refer to the original file (commit 8689fd4).
+
+| # | Issue | Type | Line(s) | Description | Fix Approach |
+|---|-------|------|---------|-------------|--------------|
 | 1 | SQL injection (Bandit B608, Medium) | Security | 11 | addTower builds the INSERT query with % string formatting, so a site name containing SQL (like x'); DROP TABLE towers;--) would be run as SQL. | Used a parameterised query with ? placeholders and passed the values as a tuple. |
 | 2 | Unsafe pickle (Bandit B301, Medium; B403, Low) | Security | 1, 43 | snapshot() pickles and unpickles the rows. pickle.loads can execute arbitrary code on untrusted data, and the round trip does nothing useful. | Removed the pickle import and made snapshot() return the fetched rows directly. |
 | 3 | Hardcoded password (Bandit B105, Low) | Security | 6 | NOC_PASSWORD is written in the source code, so it ends up in the repo and git history. | Now read from the environment with os.environ.get("NOC_PASSWORD"). |
@@ -17,3 +19,13 @@
 | 11 | Unnecessary else after return (Pylint R1705) | Style | 36-39 | The else after return is not needed. | Removed the else and returned "normal" directly. |
 | 12 | Old-style string formatting (Pylint C0209) | Style | 11 | % formatting used for the query. | Removed along with fix 1. |
 | 13 | No input validation | Robustness | 10-12 | addTower accepts empty sites and non-integer values. | Added checks that raise ValueError. |
+
+## Results
+
+| Tool | Before | After |
+|------|--------|-------|
+| Pylint | 5.14/10 | 10.00/10 |
+| Bandit | 4 issues (2 Medium, 2 Low) | 0 issues |
+| Flake8 | 7 issues | 0 issues |
+
+Program output is unchanged: `['Ridge-A'] high 2 1`. The original reports are in `reports_before/`.
